@@ -149,6 +149,32 @@
           const [autoScrollOffset, setAutoScrollOffset] = useState(0); // NUEVO
           const cartaRef = useRef(null);
 
+          // Función para enviar notificación a Telegram
+const enviarTelegram = async (respuesta) => {
+    const BOT_TOKEN = '8545621737:AAEGpVXRwfRrE0xFF6aIctoxFxF3PZFcPzA'; // REEMPLAZA CON TU TOKEN
+    const CHAT_ID = '8350196445'; // REEMPLAZA CON TU CHAT_ID
+    
+    const mensaje = respuesta === 'si' 
+        ? '🎉💕 ¡TU NOVIA DIJO QUE SÍ A MALARGÜE! ¡YUPIII! 🎉💕\n\nFecha: ' + new Date().toLocaleString('es-AR')
+        : '😔 Tu novia dijo que no puede ir a Malargüe 💔\n\nFecha: ' + new Date().toLocaleString('es-AR');
+    
+    try {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                chat_id: CHAT_ID,
+                text: mensaje
+            })
+        });
+        console.log('Notificación enviada!');
+    } catch (error) {
+        console.log('Error al enviar notificación:', error);
+    }
+};
+
           // Auto-scroll automático NUEVO
           useEffect(() => {
               const interval = setInterval(() => {
@@ -234,10 +260,12 @@
 
             const handleSi = () => {
                 setRespuesta('si');
+                enviarTelegram('si'); // Envía notificación a Telegram
             };
 
             const handleNo = () => {
                 setRespuesta('no');
+                enviarTelegram('no'); // Envía notificación a Telegram
             };
 
             // Colores según la respuesta
