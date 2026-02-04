@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Invitación San Valentín 💕</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        html {
+            height: 500vh;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        #root {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+        }
+        
+        .scroll-container {
+            -webkit-overflow-scrolling: touch;
+            overflow-y: scroll;
+        }
+        
+        .carta-text p,
+        .carta-title,
+        .carta-firma {
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0) translateX(-50%);
+            }
+            50% {
+                transform: translateY(-10px) translateX(-50%);
+            }
+        }
+        
+        .animate-bounce {
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes celebracion {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            75% { transform: scale(1.1) rotate(5deg); }
+        }
+        
+        .animate-celebracion {
+            animation: celebracion 0.5s ease-in-out 3;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        /* Mejoras para móviles */
+        @media (max-width: 768px) {
+            .carta-container {
+                max-width: 95vw !important;
+                padding: 1.5rem !important;
+                margin: 0 auto;
+            }
+            
+            .carta-title {
+                font-size: 2rem !important;
+            }
+            
+            .carta-text {
+                font-size: 1rem !important;
+            }
+        }
+        
+        /* Fix para el notch de iPhone */
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: env(safe-area-inset-left);
+                padding-right: env(safe-area-inset-right);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const Heart = ({ className, size, fill, style }) => (
+            <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width={size} 
+                height={size} 
+                viewBox="0 0 24 24" 
+                fill={fill || "none"}
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+                className={className}
+                style={style}
+            >
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+            </svg>
+        );
+
+        function InvitacionSanValentin() {
+            const [scrollY, setScrollY] = useState(0);
+            const [isMobile, setIsMobile] = useState(false);
+            const [respuesta, setRespuesta] = useState(null); // null, 'si', 'no'
+
+            const cartaRef = useRef(null);
+
+        useEffect(() => {
+            // Detectar si es móvil
+            const checkMobile = () => {
+                setIsMobile(window.innerWidth <= 768);
+            };
+            
+            checkMobile();
+            window.addEventListener('resize', checkMobile);
+
+            const handleScroll = () => {
+                setScrollY(window.scrollY);
+            };
+            
+            const handleCartaScroll = (e) => {
+                // Agregar el scroll de la carta al scroll de la ventana
+                const cartaScrollY = e.target.scrollTop;
+                setScrollY(window.scrollY + cartaScrollY);
+            };
+            
+            // Optimización para iOS Safari
+            let ticking = false;
+            const optimizedScroll = () => {
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        handleScroll();
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            };
+            
+            window.addEventListener('scroll', optimizedScroll, { passive: true });
+            
+            // Agregar listener al scroll de la carta
+            const cartaElement = cartaRef.current;
+            if (cartaElement) {
+                cartaElement.addEventListener('scroll', handleCartaScroll, { passive: true });
+            }
+            
+            return () => {
+                window.removeEventListener('scroll', optimizedScroll);
+                window.removeEventListener('resize', checkMobile);
+                if (cartaElement) {
+                    cartaElement.removeEventListener('scroll', handleCartaScroll);
+                }
+            };
+        }, []);
+
+            const fotos = [
+                '/Fotos/Airbag.jpeg',
+                '/Fotos/AirbagOscuro.jpeg',
+                '/Fotos/AñoNuevo.jpeg',
+                '/Fotos/AñoNuevoBeso.jpeg',
+                '/Fotos/Apeteco.jpeg',
+                '/Fotos/faroBistro.jpeg',
+                '/Fotos/foto7.jpg',
+                '/Fotos/foto8.jpg',
+                '/Fotos/foto9.jpg',
+                '/Fotos/foto10.jpg',
+                '/Fotos/foto11.jpg',
+                '/Fotos/foto12.jpg',
+                '/Fotos/foto13.jpg',
+                '/Fotos/foto14.jpg',
+                '/Fotos/foto15.jpg',
+                '/Fotos/foto16.jpg'
+            ];
+
+            const fotosInfinitas = [];
+            for (let i = 0; i < 20; i++) {
+                fotosInfinitas.push(...fotos);
+            }
+
+            const alturaTotalFotos = 400 * fotosInfinitas.length / (isMobile ? 2 : 3);
+            const scrollOffset = (scrollY * 0.3) % (alturaTotalFotos / 2);
+
+            const handleSi = () => {
+                setRespuesta('si');
+            };
+
+            const handleNo = () => {
+                setRespuesta('no');
+            };
+
+            // Colores según la respuesta
+            const coloresFondo = respuesta === 'no' 
+                ? 'from-gray-200 via-gray-300 to-gray-400' 
+                : 'from-rose-50 via-pink-50 to-red-50';
+            
+            const colorCorazon = respuesta === 'no' ? 'text-gray-500' : 'text-rose-500';
+            const colorCorazon2 = respuesta === 'no' ? 'text-gray-400' : 'text-pink-500';
+            const colorCorazon3 = respuesta === 'no' ? 'text-gray-600' : 'text-red-500';
+            
+            const opacidadFotos = respuesta === 'no' ? 0.2 : 0.5;
+
+            return (
+                <>
+                    {/* Fondo con fotos en collage */}
+                    <div className={`fixed inset-0 overflow-hidden bg-gradient-to-br ${coloresFondo} transition-all duration-1000`}>
+                        <div 
+                            className="relative w-full"
+                            style={{ 
+                                transform: `translate3d(0, -${scrollOffset}px, 0)`,
+                                willChange: 'transform',
+                                backfaceVisibility: 'hidden',
+                                WebkitBackfaceVisibility: 'hidden',
+                                filter: respuesta === 'no' ? 'grayscale(100%)' : 'grayscale(0%)',
+                                transition: 'filter 1s ease'
+                            }}
+                        >
+                            <div className={`grid gap-3 p-2 ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3'}`}>
+                                {fotosInfinitas.map((foto, index) => (
+                                    <div
+                                        key={index}
+                                        className="relative overflow-hidden rounded-xl shadow-lg"
+                                        style={{
+                                            height: isMobile 
+                                                ? (index % 3 === 0 ? '250px' : '220px')
+                                                : (index % 3 === 0 ? '400px' : '350px'),
+                                            marginTop: index % 2 === 0 ? '0' : (isMobile ? '30px' : '50px'),
+                                            opacity: opacidadFotos,
+                                            transition: 'opacity 1s ease'
+                                        }}
+                                    >
+                                        <img
+                                            src={foto}
+                                            alt={`Recuerdo ${(index % fotos.length) + 1}`}
+                                            className="w-full h-full object-cover"
+                                            loading="lazy"
+                                            style={{
+                                                WebkitTransform: 'translateZ(0)',
+                                                transform: 'translateZ(0)'
+                                            }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Carta principal */}
+                    <div className="fixed inset-0 z-10 flex items-center justify-center pointer-events-none" style={{ padding: isMobile ? '1rem' : '1.5rem' }}>
+                        <div className={`carta-container w-full bg-white/15 backdrop-blur-none rounded-2xl shadow-2xl border-2 ${
+                            respuesta === 'no' ? 'border-gray-400' : 'border-rose-200'
+                        } pointer-events-auto scroll-container ${
+                            isMobile ? 'max-w-[95vw] p-6 max-h-[85vh]' : 'max-w-2xl p-8 md:p-12 max-h-[90vh]'
+                        } overflow-y-auto transition-all duration-1000`}>
+                            
+                            {/* Mensaje de respuesta */}
+                            {respuesta && (
+                                <div className={`fade-in mb-6 text-center p-6 rounded-xl ${
+                                    respuesta === 'si' 
+                                        ? 'bg-rose-100/80 border-2 border-rose-300' 
+                                        : 'bg-gray-200/80 border-2 border-gray-400'
+                                }`}>
+                                    <div className={`${respuesta === 'si' ? 'text-4xl mb-3 animate-celebracion' : 'text-4xl mb-3'}`}>
+                                        {respuesta === 'si' ? '🎉💕✨' : '😔💔'}
+                                    </div>
+                                    <p className={`font-serif text-2xl font-bold ${
+                                        respuesta === 'si' ? 'text-rose-700' : 'text-gray-700'
+                                    }`}>
+                                        {respuesta === 'si' 
+                                            ? '¡Siii! ¡Yupiii! Nos vamos juntitos 💕' 
+                                            : 'Pucha che, no hay problema'}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Decoración superior */}
+                            <div className="flex justify-center mb-4 md:mb-6">
+                                <div className="flex gap-2">
+                                    <Heart 
+                                        className={`${colorCorazon} fill-current animate-pulse transition-colors duration-1000`}
+                                        size={isMobile ? 24 : 32} 
+                                        fill="currentColor" 
+                                    />
+                                    <Heart 
+                                        className={`${colorCorazon2} fill-current animate-pulse transition-colors duration-1000`}
+                                        size={isMobile ? 24 : 32} 
+                                        fill="currentColor" 
+                                        style={{ animationDelay: '0.2s' }} 
+                                    />
+                                    <Heart 
+                                        className={`${colorCorazon3} fill-current animate-pulse transition-colors duration-1000`}
+                                        size={isMobile ? 24 : 32} 
+                                        fill="currentColor" 
+                                        style={{ animationDelay: '0.4s' }} 
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Título */}
+                            <h1 className={`carta-title font-serif text-center ${
+                                respuesta === 'no' ? 'text-gray-700' : 'text-rose-800'
+                            } mb-6 md:mb-8 ${
+                                isMobile ? 'text-3xl' : 'text-4xl md:text-5xl'
+                            } transition-colors duration-1000`}>
+                                Mi Amor...
+                            </h1>
+
+                            {/* Contenido de la carta */}
+                            <div className={`carta-text space-y-4 md:space-y-6 ${
+                                respuesta === 'no' ? 'text-gray-600' : 'text-gray-700'
+                            } leading-relaxed ${
+                                isMobile ? 'text-base' : 'text-lg'
+                            } transition-colors duration-1000`}>
+                                <p className="font-serif">
+                                    Este San Valentín quiero que sea especial, diferente, memorable...
+                                </p>
+
+                                <p className="font-serif">
+                                    Te invito a escaparnos juntos a <span className={`font-bold ${
+                                        respuesta === 'no' ? 'text-gray-700' : 'text-rose-700'
+                                    } transition-colors duration-1000`}>Malargüe</span>, 
+                                    este <span className={`font-bold ${
+                                        respuesta === 'no' ? 'text-gray-700' : 'text-rose-700'
+                                    } transition-colors duration-1000`}>14 de febrero</span>, para celebrar nuestro 
+                                    amor rodeados de las montañas y la belleza de la naturaleza.
+                                </p>
+
+                                <p className="font-serif">
+                                    Pero no iremos solos... quiero que compartamos este momento con mi familia, 
+                                    con las personas que más quiero en el mundo, porque tú ya eres parte de ella.
+                                </p>
+
+                                <p className="font-serif">
+                                    Imagina: atardeceres en la montaña, risas compartidas, momentos únicos que 
+                                    quedarán para siempre en nuestra memoria, como las fotos que ahora ves deslizarse 
+                                    detrás de esta carta.
+                                </p>
+
+                                <p className={`font-serif font-bold text-center mt-6 md:mt-8 ${
+                                    respuesta === 'no' ? 'text-gray-700' : 'text-rose-800'
+                                } ${isMobile ? 'text-lg' : 'text-xl'} transition-colors duration-1000`}>
+                                    ¿Te gustaría acompañarme en esta aventura?
+                                </p>
+
+                                {!respuesta && (
+                                    <div className="flex justify-center gap-4 mt-8 md:mt-10 flex-wrap">
+                                        <button 
+                                            onClick={handleSi}
+                                            className={`bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-bold rounded-full shadow-lg transform active:scale-95 transition-all ${
+                                                isMobile ? 'py-2 px-6 text-base' : 'py-3 px-8 hover:scale-105'
+                                            }`}
+                                        >
+                                            ¡Sí, vamos! 💕
+                                        </button>
+                                        <button 
+                                            onClick={handleNo}
+                                            className={`bg-gray-500 hover:bg-gray-600 active:bg-gray-700 text-white font-bold rounded-full shadow-lg transform active:scale-95 transition-all ${
+                                                isMobile ? 'py-2 px-6 text-base' : 'py-3 px-8 hover:scale-105'
+                                            }`}
+                                        >
+                                            No puedo 😔
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Firma */}
+                            <div className="carta-firma mt-8 md:mt-12 text-center">
+                                <p className={`font-serif ${
+                                    respuesta === 'no' ? 'text-gray-700' : 'text-rose-800'
+                                } ${isMobile ? 'text-xl' : 'text-2xl'} transition-colors duration-1000`}>
+                                    Con todo mi amor,
+                                </p>
+                                <p className={`font-serif ${
+                                    respuesta === 'no' ? 'text-gray-500' : 'text-gray-600'
+                                } mt-2 ${isMobile ? 'text-lg' : 'text-xl'} transition-colors duration-1000`}>
+                                    Tu mejor novio: Gerito ❤️ 
+                                </p>
+                            </div>
+
+                            {/* Decoración inferior */}
+                            <div className="flex justify-center mt-6 md:mt-8 gap-1">
+                                {[...Array(7)].map((_, i) => (
+                                    <Heart 
+                                        key={i} 
+                                        className={`${
+                                            respuesta === 'no' ? 'text-gray-400 fill-gray-400' : 'text-rose-300 fill-rose-300'
+                                        } transition-colors duration-1000`}
+                                        size={isMobile ? 12 : 16}
+                                        fill="currentColor"
+                                        style={{ 
+                                            opacity: i === 3 ? 1 : 0.5,
+                                            transform: i === 3 ? 'scale(1.3)' : 'scale(1)'
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Indicador de scroll */}
+                    {!isMobile && (
+                        <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-20 animate-bounce pointer-events-none">
+                            <div className={`${
+                                respuesta === 'no' ? 'text-gray-600' : 'text-rose-600'
+                            } text-center transition-colors duration-1000`}>
+                                <div className="text-sm font-serif mb-2">Desliza para ver más</div>
+                                <div className="text-2xl">↓</div>
+                            </div>
+                        </div>
+                    )}
+                </>
+            );
+        }
+
+        ReactDOM.render(<InvitacionSanValentin />, document.getElementById('root'));
+    </script>
+</body>
+</html>
