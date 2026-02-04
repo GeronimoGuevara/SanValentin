@@ -143,86 +143,94 @@
         );
 
         function InvitacionSanValentin() {
-            const [scrollY, setScrollY] = useState(0);
-            const [isMobile, setIsMobile] = useState(false);
-            const [respuesta, setRespuesta] = useState(null); // null, 'si', 'no'
+          const [scrollY, setScrollY] = useState(0);
+          const [isMobile, setIsMobile] = useState(false);
+          const [respuesta, setRespuesta] = useState(null);
+          const [autoScrollOffset, setAutoScrollOffset] = useState(0); // NUEVO
+          const cartaRef = useRef(null);
 
-            const cartaRef = useRef(null);
+          // Auto-scroll automático NUEVO
+          useEffect(() => {
+              const interval = setInterval(() => {
+                  setAutoScrollOffset(prev => prev + 1); // Ajusta la velocidad aquí (0.1 = muy lento, 1 = rápido)
+              }, 30);
+              
+              return () => clearInterval(interval);
+          }, []);
 
-        useEffect(() => {
-            // Detectar si es móvil
-            const checkMobile = () => {
-                setIsMobile(window.innerWidth <= 768);
-            };
-            
-            checkMobile();
-            window.addEventListener('resize', checkMobile);
+          useEffect(() => {
+              const checkMobile = () => {
+                  setIsMobile(window.innerWidth <= 768);
+              };
+              
+              checkMobile();
+              window.addEventListener('resize', checkMobile);
 
-            const handleScroll = () => {
-                setScrollY(window.scrollY);
-            };
-            
-            const handleCartaScroll = (e) => {
-                // Agregar el scroll de la carta al scroll de la ventana
-                const cartaScrollY = e.target.scrollTop;
-                setScrollY(window.scrollY + cartaScrollY);
-            };
-            
-            // Optimización para iOS Safari
-            let ticking = false;
-            const optimizedScroll = () => {
-                if (!ticking) {
-                    window.requestAnimationFrame(() => {
-                        handleScroll();
-                        ticking = false;
-                    });
-                    ticking = true;
-                }
-            };
-            
-            window.addEventListener('scroll', optimizedScroll, { passive: true });
-            
-            // Agregar listener al scroll de la carta
-            const cartaElement = cartaRef.current;
-            if (cartaElement) {
-                cartaElement.addEventListener('scroll', handleCartaScroll, { passive: true });
-            }
-            
-            return () => {
-                window.removeEventListener('scroll', optimizedScroll);
-                window.removeEventListener('resize', checkMobile);
-                if (cartaElement) {
-                    cartaElement.removeEventListener('scroll', handleCartaScroll);
-                }
-            };
-        }, []);
+              const handleScroll = () => {
+                  setScrollY(window.scrollY);
+              };
+              
+              const handleCartaScroll = (e) => {
+                  const cartaScrollY = e.target.scrollTop;
+                  setScrollY(window.scrollY + cartaScrollY);
+              };
+              
+              let ticking = false;
+              const optimizedScroll = () => {
+                  if (!ticking) {
+                      window.requestAnimationFrame(() => {
+                          handleScroll();
+                          ticking = false;
+                      });
+                      ticking = true;
+                  }
+              };
+              
+              window.addEventListener('scroll', optimizedScroll, { passive: true });
+              
+              const cartaElement = cartaRef.current;
+              if (cartaElement) {
+                  cartaElement.addEventListener('scroll', handleCartaScroll, { passive: true });
+              }
+              
+              return () => {
+                  window.removeEventListener('scroll', optimizedScroll);
+                  window.removeEventListener('resize', checkMobile);
+                  if (cartaElement) {
+                      cartaElement.removeEventListener('scroll', handleCartaScroll);
+                  }
+              };
+          }, []);
 
-            const fotos = [
-                'Imagenes/Airbag.jpeg',
-                'Imagenes/AirbagOscuro.jpeg',
-                'Imagenes/AñoNuevo.jpeg',
-                'Imagenes/AñoNuevoBeso.jpeg',
-                'Imagenes/Apeteco.jpeg',
-                'Imagenes/faroBistro.jpeg',
-                'Imagenes/faroBistroBeso.jpeg',
-                'Imagenes/faroBistroEspejo.jpeg',
-                'Imagenes/lengua.jpeg',
-                'Imagenes/lenguaPileta.jpeg',
-                'Imagenes/postPile.jpeg',
-                'Imagenes/postPileAbrazados.jpeg',
-                'Imagenes/potre2.jpeg',
-                'Imagenes/potreJuntos.jpeg',
-                'Imagenes/solEnLaCara.jpeg',
-                'Imagenes/ultimaPile.jpeg',
-            ];
+          const fotos = [
+              'Imagenes/Airbag.jpeg',
+              'Imagenes/AirbagOscuro.jpeg',
+              'Imagenes/AñoNuevo.jpeg',
+              'Imagenes/AñoNuevoBeso.jpeg',
+              'Imagenes/Apeteco.jpeg',
+              'Imagenes/faroBistro.jpeg',
+              'Imagenes/faroBistroBeso.jpeg',
+              'Imagenes/faroBistroEspejo.jpeg',
+              'Imagenes/lengua.jpeg',
+              'Imagenes/lenguaPileta.jpeg',
+              'Imagenes/postPile.jpeg',
+              'Imagenes/postPileAbrazados.jpeg',
+              'Imagenes/potre2.jpeg',
+              'Imagenes/potreJuntos.jpeg',
+              'Imagenes/solEnLaCara.jpeg',
+              'Imagenes/ultimaPile.jpeg',
+          ];
 
-            const fotosInfinitas = [];
-            for (let i = 0; i < 20; i++) {
-                fotosInfinitas.push(...fotos);
-            }
+          const fotosInfinitas = [];
+          for (let i = 0; i < 20; i++) {
+              fotosInfinitas.push(...fotos);
+          }
 
-            const alturaTotalFotos = 400 * fotosInfinitas.length / (isMobile ? 2 : 3);
-            const scrollOffset = (scrollY * 0.3) % (alturaTotalFotos / 2);
+          // MODIFICADO: Combina scroll manual + auto-scroll
+          const alturaTotalFotos = 400 * fotosInfinitas.length / (isMobile ? 2 : 3);
+          const scrollOffset = ((scrollY * 8) + autoScrollOffset) % (alturaTotalFotos / 2);
+
+          // ... resto del código igual (handleSi, handleNo, colores, etc.)
 
             const handleSi = () => {
                 setRespuesta('si');
